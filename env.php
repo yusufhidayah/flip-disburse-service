@@ -1,8 +1,8 @@
 <?php
   $variables = [
-      'DATABASE_HOST' => 'localhost',
+      'DATABASE_HOST' => '127.0.0.1',
       'DATABASE_USERNAME' => 'root',
-      'DATABASE_PASSWORD' => '',
+      'DATABASE_PASSWORD' => 'bukalapak',
       'DATABASE_NAME' => 'disburse_development',
       'DATABASE_PORT' => '3306',
 			'FLIP_API_HOST' => 'https://nextar.flip.id',
