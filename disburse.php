@@ -24,11 +24,10 @@
 				$dbh = Lib\Database::getInstance();
 				$dbh->beginTransaction();
 
-				$statement = $dbh->prepare("INSERT INTO `transactions` (`amount`, `payment_method`, `created_at`) VALUES (?, ?, ?)");
-				if (!$statement->execute([$data['amount'], $payment_method, $current_time])) $dbh->rollback();
-				$last_transaction_id = $dbh->lastInsertId();
+				$transaction = new Model\Transaction($data['amount'], "FLIP");
+				$transaction->create();
 
-				$data['remark'] = "transaction_id_".$last_transaction_id;
+				$data['remark'] = "transaction_id_".$transaction->id;
 				$flipAPI = new Lib\FlipAPI();
 				$response = $flipAPI->createDisbursement($data);
 				$json_response = json_decode($response);
@@ -42,7 +41,7 @@
 					"`receipt`, `time_served`, `fee`, `created_at`, `updated_at`) ".
 					"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 				if (!$statement->execute([
-					$last_transaction_id,
+					$transaction->id,
 					$json_response->id,
 					$json_response->bank_code,
 					$json_response->account_number,
@@ -128,7 +127,10 @@
 				}
 				break;
 			case 'test':
-				$dbh = Lib\Database::getInstance();
+				$transaction = new Model\Transaction(5000, "FLIP");
+				$transaction->create();
+				var_dump($transaction->create());
+				break;
 			default:
 				echo "unknown command!!!";
 		}
