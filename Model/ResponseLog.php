@@ -1,5 +1,5 @@
 <?php
-	namespace Model;
+	namespace Disburse;
 
 	class ResponseLog {
 		

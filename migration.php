@@ -16,12 +16,12 @@
 		echo $e->getMessage()."\n";
 	}
 
-	echo ("Create transaction table...");
+	echo ("Create transactions table...");
 	try {
-		$sql = "CREATE table transaction(
-		id INT(20) AUTO_INCREMENT PRIMARY KEY,
+		$sql = "CREATE table transactions(
+		id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 		amount INT(11) NOT NULL,
-		flip_disburse_id INT(20) NULL, 
+		payment_method VARCHAR(50) NULL,
 		created_at DATETIME(6) NOT NULL);" ;
 		$db_connection->exec("USE ".env("DATABASE_NAME").";");
 		$db_connection->exec($sql);
@@ -30,17 +30,18 @@
 		echo $e->getMessage()."\n";
 	}
 
-	echo ("Create disburse table...");
+	echo ("Create flip disbursements table...");
 	try {
-		$sql = "CREATE table disburse(
+		$sql = "CREATE table flip_disbursements(
 		id INT(20) AUTO_INCREMENT PRIMARY KEY,
-		disburse_transaction_id INT(20) NOT NULL,
+		transactions_id BIGINT UNSIGNED NOT NULL,
+		external_disbursement_id BIGINT UNSIGNED NOT NULL,
 		bank_code VARCHAR(50) NOT NULL,
 		account_number VARCHAR(50) NOT NULL,
 		remark VARCHAR(50) NULL,
 		status VARCHAR(10) NOT NULL,
 		receipt VARCHAR(250) NULL,
-		time_served DATETIME(6) NOT NULL,
+		time_served DATETIME(6) NULL,
 		fee INT(11) NOT NULL,
 		created_at DATETIME(6) NOT NULL,
 		updated_at DATETIME(6) NOT NULL);";
@@ -51,13 +52,13 @@
 		echo $e->getMessage()."\n";
 	}
 
-	echo ("Create flip_response_log table...");
+	echo ("Create flip_response_logs table...");
 	try {
-		$sql = "CREATE table flip_response_log(
-		id INT(20) AUTO_INCREMENT PRIMARY KEY,
-		disburse_id INT(20) NOT NULL,
-		disburse_transaction_id INT(20) NOT NULL,
-		request_type VARCHAR(50) NOT NULL,
+		$sql = "CREATE table flip_response_logs(
+		id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+		disbursements_id BIGINT UNSIGNED NOT NULL,
+		external_disbursement_id BIGINT UNSIGNED NOT NULL,
+		request_path VARCHAR(100) NOT NULL,
 		response TEXT NULL,
 		created_at DATETIME(6) NOT NULL);" ;
 		$db_connection->exec("USE ".env("DATABASE_NAME").";");
