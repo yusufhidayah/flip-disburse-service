@@ -69,7 +69,7 @@
 
 				$dbh->commit();
 				echo "success!\n";
-				echo "info: you can check disbursement status using -> php disburse.php status ".$last_disbursement_id;
+				echo "info: you can check disbursement status using -> php disburse.php status ".$last_disbursement_id."\n";
 				break;
 			case 'status':
 				echo "check disburse status and update it to our database\n";
