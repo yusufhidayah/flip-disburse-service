@@ -50,7 +50,7 @@
 	 
 			// EXECUTE:
 			$result = curl_exec($curl);
-			if(!$result){die("Connection Failure");}
+			if(!$result){die("Connection to FLIP API Gateway Failure");}
 			curl_close($curl);
 			return $result;
 		}
