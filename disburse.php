@@ -35,24 +35,37 @@
 					$time_served = $json_response->time_served;
 				};
 
-				$statement = $dbh->prepare("INSERT INTO `flip_disbursements` ".
-					"(`transactions_id`, `external_disbursement_id`, ".
-					"`bank_code`, `account_number`, `remark`, `status`, ".
-					"`receipt`, `time_served`, `fee`, `created_at`, `updated_at`) ".
-					"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-				if (!$statement->execute([
+				$disbursement = new Model\FlipDisbursement(
 					$transaction->id,
-					$json_response->id,
-					$json_response->bank_code,
-					$json_response->account_number,
-					$json_response->remark,
-					$json_response->status,
-					$json_response->receipt,
+					(int)$json_response->id,
+					(string)$json_response->bank_code,
+					(string)$json_response->account_number,
+					(string)$json_response->remark,
+					(string)$json_response->status,
+					(string)$json_response->receipt,
 					$time_served,
-					$json_response->fee,
-					$current_time,
-					$current_time])) $dbh->rollback();
-				$last_disbursement_id = $dbh->lastInsertId();
+					(string)$json_response->fee
+				);
+				$disbursement->create();
+
+				// $statement = $dbh->prepare("INSERT INTO `flip_disbursements` ".
+				// 	"(`transactions_id`, `external_disbursement_id`, ".
+				// 	"`bank_code`, `account_number`, `remark`, `status`, ".
+				// 	"`receipt`, `time_served`, `fee`, `created_at`, `updated_at`) ".
+				// 	"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+				// if (!$statement->execute([
+				// 	$transaction->id,
+				// 	$json_response->id,
+				// 	$json_response->bank_code,
+				// 	$json_response->account_number,
+				// 	$json_response->remark,
+				// 	$json_response->status,
+				// 	$json_response->receipt,
+				// 	$time_served,
+				// 	$json_response->fee,
+				// 	$current_time,
+				// 	$current_time])) $dbh->rollback();
+				// $last_disbursement_id = $dbh->lastInsertId();
 
 				$statement = $dbh->prepare("INSERT INTO `flip_response_logs` ".
 					"(`disbursements_id`, `external_disbursement_id`, ".
@@ -60,7 +73,7 @@
 					"VALUES (?, ?, ?, ?, ?)");
 
 				if (!$statement->execute([
-					$last_disbursement_id,
+					$disbursement->id,
 					$json_response->id,
 					'POST /disburse',
 					$response,
@@ -68,7 +81,7 @@
 
 				$dbh->commit();
 				echo "success!\n";
-				echo "info: you can check disbursement status using -> php disburse.php status ".$last_disbursement_id."\n";
+				echo "info: you can check disbursement status using -> php disburse.php status ".$disbursement->id."\n";
 				break;
 			case 'status':
 				echo "check disburse status and update it to our database\n";
