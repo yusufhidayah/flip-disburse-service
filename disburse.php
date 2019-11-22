@@ -12,6 +12,7 @@
 				$account_number = (string)$argv[4];
 				$current_time		= date("Y-m-d H:i:s");
 				$payment_method	=	'FLIP';
+				$time_served		= null;
 
 				$data = array(
 					"bank_code"=>(string)$bank_code,
@@ -31,9 +32,7 @@
 				$flipAPI = new FlipAPI();
 				$response = $flipAPI->createDisbursement($data);
 				$json_response = json_decode($response);
-				if (strtotime('0000-00-00 00:00:00') < 0) {
-					$time_served = null;
-				} else {
+				if (strtotime($json_response->time_served) > 0) {
 					$time_served = $json_response->time_served;
 				};
 
@@ -70,15 +69,63 @@
 
 				$dbh->commit();
 				echo "success!\n";
-				echo "info: flip disbursement id: ".$json_response->id;
+				echo "info: you can check disbursement status using -> php disburse.php status ".$last_disbursement_id;
 				break;
 			case 'status':
-				echo "check disburse status and update if any\n";
-				$disburse_transaction_id = (int)$argv[2];
+				echo "check disburse status and update it to our database\n";
+				$flip_disbursements_id = (int)$argv[2];
+				$current_time = date("Y-m-d H:i:s");
+				$time_served = null;
 
-				$flipAPI = new FlipAPI();
-				$get_data = $flipAPI->getDisbursement($disburse_transaction_id);
-				var_dump($get_data);
+				$dbh = Database::getInstance();
+
+				$stmt = $dbh->prepare("SELECT * FROM `flip_disbursements` WHERE id=?");
+				$stmt->execute([$flip_disbursements_id]);
+				$disbursement = $stmt->fetch();
+
+				if (!$disbursement) {
+					echo "record not found, please try another disbursement id";
+					return;
+				}
+
+				$flipAPI	= new FlipAPI();
+				$response = $flipAPI->getDisbursement((int)$disbursement['external_disbursement_id']);
+				$json_response = json_decode($response);
+				if (strtotime($json_response->time_served) > 0) {
+					$time_served = $json_response->time_served;
+				};
+
+				$statement = $dbh->prepare("INSERT INTO `flip_response_logs` ".
+					"(`disbursements_id`, `external_disbursement_id`, ".
+					"`request_path`, `response`, `created_at`) ".
+					"VALUES (?, ?, ?, ?, ?)");
+
+				if (!$statement->execute([
+					$flip_disbursements_id,
+					$json_response->id,
+					"GET /disburse/".$json_response->id,
+					$response,
+					$current_time])) $dbh->rollback();
+
+				$status_changed = $disbursement['status'] != $json_response->status;
+
+				if ($status_changed) {
+					echo "status changed, save it to database... ";
+
+					$dbh->beginTransaction();
+
+					$statement = $dbh->prepare("UPDATE `flip_disbursements` ".
+						"SET `status`=?, `receipt`=?, `time_served`=?, `updated_at`=? WHERE `id`=?");
+					if (!$statement->execute([
+						$json_response->status,
+						$json_response->receipt,
+						$time_served,
+						$current_time,
+						$flip_disbursements_id])) $dbh->rollback();
+
+						$dbh->commit();
+						echo "successfully updated!\n";
+				}
 				break;
 			default:
 				echo "unknown command!!!";
