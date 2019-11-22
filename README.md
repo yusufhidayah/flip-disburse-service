@@ -14,6 +14,7 @@ vim env.php
 #### 2. Run database migration file
 ```
 # run migration file to create database
+# will create 3 tables: transactions table, flip_disbursements table & flip_response_logs table
 php migration.php
 ```
 
