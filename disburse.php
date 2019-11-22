@@ -21,7 +21,7 @@
 					"remark"=> ""
 				);
 
-				$dbh = Database::getInstance();
+				$dbh = Lib\Database::getInstance();
 				$dbh->beginTransaction();
 
 				$statement = $dbh->prepare("INSERT INTO `transactions` (`amount`, `payment_method`, `created_at`) VALUES (?, ?, ?)");
@@ -29,7 +29,7 @@
 				$last_transaction_id = $dbh->lastInsertId();
 
 				$data['remark'] = "transaction_id_".$last_transaction_id;
-				$flipAPI = new FlipAPI();
+				$flipAPI = new Lib\FlipAPI();
 				$response = $flipAPI->createDisbursement($data);
 				$json_response = json_decode($response);
 				if (strtotime($json_response->time_served) > 0) {
@@ -77,7 +77,7 @@
 				$current_time = date("Y-m-d H:i:s");
 				$time_served = null;
 
-				$dbh = Database::getInstance();
+				$dbh = Lib\Database::getInstance();
 
 				$stmt = $dbh->prepare("SELECT * FROM `flip_disbursements` WHERE id=?");
 				$stmt->execute([$flip_disbursements_id]);
@@ -88,7 +88,7 @@
 					return;
 				}
 
-				$flipAPI	= new FlipAPI();
+				$flipAPI	= new Lib\FlipAPI();
 				$response = $flipAPI->getDisbursement((int)$disbursement['external_disbursement_id']);
 				$json_response = json_decode($response);
 				if (strtotime($json_response->time_served) > 0) {
@@ -127,6 +127,8 @@
 						echo "successfully updated!\n";
 				}
 				break;
+			case 'test':
+				$dbh = Lib\Database::getInstance();
 			default:
 				echo "unknown command!!!";
 		}

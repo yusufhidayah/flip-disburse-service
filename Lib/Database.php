@@ -1,4 +1,6 @@
 <?php
+	namespace Lib;
+
 	class Database {
 		static protected $instance = null;
 
@@ -6,7 +8,7 @@
     protected function __construct() {
 				$dsn = "mysql:host=".env('DATABASE_HOST').";dbname=".env('DATABASE_NAME');
 				$this->connection = new \PDO($dsn, env('DATABASE_USERNAME'), env('DATABASE_PASSWORD'));
-				$this->connection->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+				$this->connection->setAttribute( \PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
     }
 
     public function getConnection()

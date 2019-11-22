@@ -3,7 +3,8 @@
 
 	class Autoloader {
 		public function load($className) {
-			$file = __DIR__  . "/" . str_replace("\\", "/", $className) . '.php';
+			$root_directory = chop(__DIR__, "/Lib");
+			$file = $root_directory . "/" . str_replace("\\", "/", $className) . '.php';
 			if (file_exists($file)) {
 					require $file;
 			} else {
