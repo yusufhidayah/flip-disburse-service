@@ -4,7 +4,6 @@
 	class Autoloader {
 		public function load($className) {
 			$file = __DIR__  . "/" . str_replace("\\", "/", $className) . '.php';
-			echo $file;
 			if (file_exists($file)) {
 					require $file;
 			} else {
