@@ -38,6 +38,7 @@
 			// OPTIONS:
 			curl_setopt($curl, CURLOPT_URL, $url);
 			curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+			curl_setopt($curl, CURLOPT_HEADER, true);
 
 			$basic_credentials = base64_encode(env('FLIP_BASIC_USERNAME').":".env('FLIP_BASIC_PASSWORD'));
 			curl_setopt($curl, CURLOPT_HTTPHEADER, array(
@@ -50,6 +51,8 @@
 	 
 			// EXECUTE:
 			$result = curl_exec($curl);
+			$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			var_dump($httpcode);
 			if(!$result){die("Connection to FLIP API Gateway Failure");}
 			curl_close($curl);
 			return $result;
