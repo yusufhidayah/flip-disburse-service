@@ -1,6 +1,6 @@
 <?php
 	class FlipAPI {
-		public function postDisbursement($data) {
+		public function createDisbursement($data) {
 			$permitted_data = array(
 				"bank_code"=>(string)$data['bank_code'],
 				"account_number"=>(string)$data['account_number'],
@@ -23,7 +23,7 @@
 				 case "POST":
 						curl_setopt($curl, CURLOPT_POST, 1);
 						if ($data)
-							 curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+							 curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
 						break;
 				 case "PUT":
 						curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
