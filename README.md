@@ -32,3 +32,9 @@ php disburse.php create 35000 bni 1300004453222
 # {disbursement_id} is id from flip_disbursements table
 php disburse.php status 2
 ```
+
+### Database
+There are 3 tables:
+1. transactions table holds amount of transaction.
+2. flip_disbursements table holds disbursement data and transaction id.
+3. flip_response_logs table contain body response from API when request (POST & GET) disbursement.
