@@ -62,7 +62,7 @@
 
 			$this->status				= $data['status'];
 			$this->receipt			= $data['receipt'];
-			$this->time_served	= $data['time_served'];
+			$this->time_served	= $this->adjusted_time_served($data['time_served']);
 			$this->updated_at		=	date("Y-m-d H:i:s");
 
 			$statement = $this->db_connection->prepare("UPDATE `flip_disbursements` ".
@@ -93,7 +93,7 @@
 			$this->remark										= $data['remark'];
 			$this->status										= $data['status'];
 			$this->receipt									= $data['receipt'];
-			$this->time_served							= $data['time_served'];
+			$this->time_served							= $this->adjusted_time_served($data['time_served']);
 			$this->fee											= $data['fee'];
 			$this->created_at								= $data['created_at'];
 			$this->updated_at								= $data['updated_at'];
@@ -151,6 +151,10 @@
 				default:
 					throw new \Exception('Invalid attribute: '.$attr);
 			}
+		}
+
+		private function adjusted_time_served($time_served) {
+			return (strtotime($json_response->time_served) > 0) ? $time_served : null;
 		}
 	}
 ?>
