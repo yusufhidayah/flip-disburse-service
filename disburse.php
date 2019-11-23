@@ -35,7 +35,7 @@
 					$time_served = $json_response->time_served;
 				};
 
-				$disbursement = new Model\FlipDisbursement(
+				$disbursement = Model\FlipDisbursement::create(
 					$transaction->id,
 					(int)$json_response->id,
 					(string)$json_response->bank_code,
@@ -46,7 +46,6 @@
 					$time_served,
 					(string)$json_response->fee
 				);
-				$disbursement->create();
 
 				Model\FlipResponseLog::Log(
 					$disbursement->id,
@@ -67,58 +66,43 @@
 
 				$dbh = Lib\Database::getInstance();
 
-				$stmt = $dbh->prepare("SELECT * FROM `flip_disbursements` WHERE id=?");
-				$stmt->execute([$flip_disbursements_id]);
-				$disbursement = $stmt->fetch();
-
+				$disbursement = Model\FlipDisbursement::findById($flip_disbursements_id);
 				if (!$disbursement) {
-					echo "record not found, please try another disbursement id";
+					echo "record not found, please try another disbursement id\n";
 					return;
 				}
 
 				$flipAPI	= new Lib\FlipAPI();
-				$response = $flipAPI->getDisbursement((int)$disbursement['external_disbursement_id']);
+				$response = $flipAPI->getDisbursement((int)$disbursement->external_disbursement_id);
 				$json_response = json_decode($response);
 				if (strtotime($json_response->time_served) > 0) {
 					$time_served = $json_response->time_served;
 				};
 
-				$statement = $dbh->prepare("INSERT INTO `flip_response_logs` ".
-					"(`disbursements_id`, `external_disbursement_id`, ".
-					"`request_path`, `response`, `created_at`) ".
-					"VALUES (?, ?, ?, ?, ?)");
-
-				if (!$statement->execute([
+				Model\FlipResponseLog::Log(
 					$flip_disbursements_id,
 					$json_response->id,
 					"GET /disburse/".$json_response->id,
-					$response,
-					$current_time])) $dbh->rollback();
+					$response
+				);
 
-				$status_changed = $disbursement['status'] != $json_response->status;
+				$status_changed = $disbursement->status != $json_response->status;
 
 				if ($status_changed) {
 					echo "status changed, save it to database... ";
-
-					$dbh->beginTransaction();
-
-					$statement = $dbh->prepare("UPDATE `flip_disbursements` ".
-						"SET `status`=?, `receipt`=?, `time_served`=?, `updated_at`=? WHERE `id`=?");
-					if (!$statement->execute([
-						$json_response->status,
-						$json_response->receipt,
-						$time_served,
-						$current_time,
-						$flip_disbursements_id])) $dbh->rollback();
-
-						$dbh->commit();
-						echo "successfully updated!\n";
+					
+					$data = array(
+						"status" => $json_response->status,
+						"receipt" => $json_response->receipt,
+						"time_served" => $time_served
+					);
+					$result = $disbursement->update($data);
+					if ($result) echo "successfully updated!\n"; else echo "update failed!\n";
 				}
 				break;
 			case 'test':
-				$transaction = new Model\Transaction(5000, "FLIP");
-				$transaction->create();
-				var_dump($transaction->create());
+				$disbursement = Model\FlipDisbursement::findById(2000);
+				var_dump($disbursement);
 				break;
 			default:
 				echo "unknown command!!!";
