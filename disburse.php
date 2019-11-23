@@ -77,14 +77,7 @@
 			if ($result) echo "successfully updated!\n"; else echo "update failed!\n";
 
 			break;
-		case 'test':
-		  var_dump(Lib\FlipAPI::getDisbursement(1));
-			break;
 		default:
 			echo "unknown command!!!";
-	}
-
-	function test_there(){
-		echo "aaa";
 	}
 ?>
