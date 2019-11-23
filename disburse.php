@@ -83,17 +83,12 @@
 					$time_served = $json_response->time_served;
 				};
 
-				$statement = $dbh->prepare("INSERT INTO `flip_response_logs` ".
-					"(`disbursements_id`, `external_disbursement_id`, ".
-					"`request_path`, `response`, `created_at`) ".
-					"VALUES (?, ?, ?, ?, ?)");
-
-				if (!$statement->execute([
+				Model\FlipResponseLog::Log(
 					$flip_disbursements_id,
 					$json_response->id,
 					"GET /disburse/".$json_response->id,
-					$response,
-					$current_time])) $dbh->rollback();
+					$response
+				);
 
 				$status_changed = $disbursement['status'] != $json_response->status;
 
