@@ -44,8 +44,23 @@
 			return $instance;
 		}
 
-		public static function findById($id) {
+		public static function findById($inputId) {
+			$instance = new self();
+			$id = (int)$inputId;
+			$result = $instance->selectFromDatabaseById($id);
+			if ($result) {
+				$instance->fillAttribute($result);
+			} else {
+				$instance = null;
+			}
+			
+			return $instance;
+		}
 
+		protected function selectFromDatabaseById($id) {
+			$stmt = $this->db_connection->prepare("SELECT * FROM `flip_disbursements` WHERE id=?");
+			$stmt->execute([$id]);
+			return $stmt->fetch();
 		}
 
 		protected function fillAttribute($data) {

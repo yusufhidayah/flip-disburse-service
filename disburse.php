@@ -66,17 +66,14 @@
 
 				$dbh = Lib\Database::getInstance();
 
-				$stmt = $dbh->prepare("SELECT * FROM `flip_disbursements` WHERE id=?");
-				$stmt->execute([$flip_disbursements_id]);
-				$disbursement = $stmt->fetch();
-
+				$disbursement = Model\FlipDisbursement::findById($flip_disbursements_id);
 				if (!$disbursement) {
-					echo "record not found, please try another disbursement id";
+					echo "record not found, please try another disbursement id\n";
 					return;
 				}
 
 				$flipAPI	= new Lib\FlipAPI();
-				$response = $flipAPI->getDisbursement((int)$disbursement['external_disbursement_id']);
+				$response = $flipAPI->getDisbursement((int)$disbursement->external_disbursement_id);
 				$json_response = json_decode($response);
 				if (strtotime($json_response->time_served) > 0) {
 					$time_served = $json_response->time_served;
@@ -89,7 +86,7 @@
 					$response
 				);
 
-				$status_changed = $disbursement['status'] != $json_response->status;
+				$status_changed = $disbursement->status != $json_response->status;
 
 				if ($status_changed) {
 					echo "status changed, save it to database... ";
@@ -110,7 +107,7 @@
 				}
 				break;
 			case 'test':
-				$disbursement = Model\FlipDisbursement::find_by_id(5);
+				$disbursement = Model\FlipDisbursement::findById(2000);
 				var_dump($disbursement);
 				break;
 			default:
