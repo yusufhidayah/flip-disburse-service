@@ -1,4 +1,6 @@
 <?php
+	namespace Lib;
+
 	class FlipAPI {
 		public function createDisbursement($data) {
 			$permitted_data = array(
@@ -50,7 +52,10 @@
 	 
 			// EXECUTE:
 			$result = curl_exec($curl);
-			if(!$result){die("Connection to FLIP API Gateway Failure");}
+			$httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+			if($httpcode == 522){ die("Connection to FLIP API Gateway Timed Out\n"); }
+			if(!$result){ die("Connection to FLIP API Gateway Failure\n"); }
 			curl_close($curl);
 			return $result;
 		}
