@@ -48,17 +48,6 @@
 				);
 				$disbursement->create();
 
-				// $statement = $dbh->prepare("INSERT INTO `flip_response_logs` ".
-				// 	"(`disbursements_id`, `external_disbursement_id`, ".
-				// 	"`request_path`, `response`, `created_at`) ".
-				// 	"VALUES (?, ?, ?, ?, ?)");
-
-				// if (!$statement->execute([
-				// 	$disbursement->id,
-				// 	$json_response->id,
-				// 	'POST /disburse',
-				// 	$response,
-				// 	$current_time])) $dbh->rollback();
 				Model\FlipResponseLog::Log(
 					$disbursement->id,
 					$json_response->id,
