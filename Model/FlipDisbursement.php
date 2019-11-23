@@ -58,6 +58,8 @@
 		}
 
 		public function update($data){
+			if ($this->status == $data['status']){ return false; };
+
 			$this->status				= $data['status'];
 			$this->receipt			= $data['receipt'];
 			$this->time_served	= $data['time_served'];

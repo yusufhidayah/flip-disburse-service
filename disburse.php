@@ -85,20 +85,15 @@
 					"GET /disburse/".$json_response->id,
 					$response
 				);
-
-				$status_changed = $disbursement->status != $json_response->status;
-
-				if ($status_changed) {
-					echo "status changed, save it to database... ";
 					
-					$data = array(
-						"status" => $json_response->status,
-						"receipt" => $json_response->receipt,
-						"time_served" => $time_served
-					);
-					$result = $disbursement->update($data);
-					if ($result) echo "successfully updated!\n"; else echo "update failed!\n";
-				}
+				$data = array(
+					"status" => $json_response->status,
+					"receipt" => $json_response->receipt,
+					"time_served" => $time_served
+				);
+				$result = $disbursement->update($data);
+				if ($result) echo "successfully updated!\n"; else echo "update failed!\n";
+
 				break;
 			case 'test':
 				$disbursement = Model\FlipDisbursement::findById(2000);
