@@ -15,20 +15,75 @@
 		private $created_at;
 		private $updated_at;
 
-		private $dbh;
+		private $db_connection;
 
-		public function __construct($transactions_id, $external_disbursement_id, $bank_code, $account_number, $remark, $status, $receipt, $time_served, $fee) {
-			$this->transactions_id					= $transactions_id;
-			$this->external_disbursement_id	= $external_disbursement_id;
-			$this->bank_code								= $bank_code;
-			$this->account_number						= $account_number;
-			$this->remark										= $remark;
-			$this->status										= $status;
-			$this->receipt									= $receipt;
-			$this->time_served							= $time_served;
-			$this->fee											= $fee;
+		public function __construct() {
+			$this->db_connection = \Lib\Database::getInstance();
+		}
 
-			$this->dbh = \Lib\Database::getInstance();
+		public static function create($transactions_id, $external_disbursement_id, $bank_code, $account_number, $remark, $status, $receipt, $time_served, $fee) {
+			$current_time = date("Y-m-d H:i:s");
+			$data = array(
+				"transactions_id" => $transactions_id,
+				"external_disbursement_id" => $external_disbursement_id,
+				"bank_code" => $bank_code,
+				"account_number" => $account_number,
+				"remark" => $remark,
+				"status" => $status,
+				"receipt" => $receipt,
+				"time_served" => $time_served,
+				"fee" => $fee,
+				"created_at" => $current_time,
+				"updated_at" => $current_time
+			);
+
+			$instance = new self();
+			$instance->fillAttribute($data);
+			$instance->insertToDatabase();
+
+			return $instance;
+		}
+
+		public static function findById($id) {
+
+		}
+
+		protected function fillAttribute($data) {
+			$this->id												= $data['id'];
+			$this->transactions_id					= $data['transactions_id'];
+			$this->external_disbursement_id = $data['external_disbursement_id'];
+			$this->bank_code								= $data['bank_code'];
+			$this->account_number						= $data['account_number'];
+			$this->remark										= $data['remark'];
+			$this->status										= $data['status'];
+			$this->receipt									= $data['receipt'];
+			$this->time_served							= $data['time_served'];
+			$this->fee											= $data['fee'];
+			$this->created_at								= $data['created_at'];
+			$this->updated_at								= $data['updated_at'];
+		}
+
+		protected function insertToDatabase() {
+			$statement = $this->db_connection->prepare("INSERT INTO `flip_disbursements` ".
+			"(`transactions_id`, `external_disbursement_id`, ".
+			"`bank_code`, `account_number`, `remark`, `status`, ".
+			"`receipt`, `time_served`, `fee`, `created_at`, `updated_at`) ".
+			"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+			$statement->execute([
+				$this->transactions_id,
+				$this->external_disbursement_id,
+				$this->bank_code,
+				$this->account_number,
+				$this->remark,
+				$this->status,
+				$this->receipt,
+				$this->time_served,
+				$this->fee,
+				$this->created_at,
+				$this->updated_at]);
+
+			$this->id = $this->db_connection->lastInsertId();
+			return $this->id;
 		}
 
 		public function __get($attr) {
@@ -58,34 +113,8 @@
 				case 'updated_at':
 					return $this->updated_at;
 				default:
-					throw new Exception('Invalid attribute: '.$attr);
+					throw new \Exception('Invalid attribute: '.$attr);
 			}
-		}
-
-		public function create() {
-			$this->created_at = date("Y-m-d H:i:s");
-			$this->updated_at = $this->created_at;
-
-			$statement = $this->dbh->prepare("INSERT INTO `flip_disbursements` ".
-			"(`transactions_id`, `external_disbursement_id`, ".
-			"`bank_code`, `account_number`, `remark`, `status`, ".
-			"`receipt`, `time_served`, `fee`, `created_at`, `updated_at`) ".
-			"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-			$statement->execute([
-				$this->transactions_id,
-				$this->external_disbursement_id,
-				$this->bank_code,
-				$this->account_number,
-				$this->remark,
-				$this->status,
-				$this->receipt,
-				$this->time_served,
-				$this->fee,
-				$this->created_at,
-				$this->updated_at]);
-
-			$this->id = $this->dbh->lastInsertId();
-			return $this->id;
 		}
 	}
 ?>

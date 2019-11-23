@@ -35,7 +35,7 @@
 					$time_served = $json_response->time_served;
 				};
 
-				$disbursement = new Model\FlipDisbursement(
+				$disbursement = Model\FlipDisbursement::create(
 					$transaction->id,
 					(int)$json_response->id,
 					(string)$json_response->bank_code,
@@ -46,7 +46,6 @@
 					$time_served,
 					(string)$json_response->fee
 				);
-				$disbursement->create();
 
 				Model\FlipResponseLog::Log(
 					$disbursement->id,
@@ -111,9 +110,8 @@
 				}
 				break;
 			case 'test':
-				$transaction = new Model\Transaction(5000, "FLIP");
-				$transaction->create();
-				var_dump($transaction->create());
+				$disbursement = Model\FlipDisbursement::find_by_id(5);
+				var_dump($disbursement);
 				break;
 			default:
 				echo "unknown command!!!";
