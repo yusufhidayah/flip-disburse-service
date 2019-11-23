@@ -2,7 +2,7 @@
 	namespace Lib;
 
 	class FlipAPI {
-		public function createDisbursement($data) {
+		public static function createDisbursement($data) {
 			$permitted_data = array(
 				"bank_code"=>(string)$data['bank_code'],
 				"account_number"=>(string)$data['account_number'],
@@ -10,14 +10,14 @@
 				"remark"=>(string)$data['remark']
 			);
 
-			return $this->sendRequest("POST", "/disburse", $permitted_data);
+			return static::sendRequest("POST", "/disburse", $permitted_data);
 		}
 
-		public function getDisbursement($transaction_id) {
-			return $this->sendRequest("GET", "/disburse/".$transaction_id, false);
+		public static function getDisbursement($transaction_id) {
+			return static::sendRequest("GET", "/disburse/".$transaction_id, false);
 		}
 
-		private function sendRequest($method, $path, $data){
+		public static function sendRequest($method, $path, $data){
 			$curl = curl_init();
 			$url	=	env('FLIP_API_HOST')."".$path;
 	 
