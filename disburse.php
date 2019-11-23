@@ -48,36 +48,23 @@
 				);
 				$disbursement->create();
 
-				// $statement = $dbh->prepare("INSERT INTO `flip_disbursements` ".
-				// 	"(`transactions_id`, `external_disbursement_id`, ".
-				// 	"`bank_code`, `account_number`, `remark`, `status`, ".
-				// 	"`receipt`, `time_served`, `fee`, `created_at`, `updated_at`) ".
-				// 	"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+				// $statement = $dbh->prepare("INSERT INTO `flip_response_logs` ".
+				// 	"(`disbursements_id`, `external_disbursement_id`, ".
+				// 	"`request_path`, `response`, `created_at`) ".
+				// 	"VALUES (?, ?, ?, ?, ?)");
+
 				// if (!$statement->execute([
-				// 	$transaction->id,
+				// 	$disbursement->id,
 				// 	$json_response->id,
-				// 	$json_response->bank_code,
-				// 	$json_response->account_number,
-				// 	$json_response->remark,
-				// 	$json_response->status,
-				// 	$json_response->receipt,
-				// 	$time_served,
-				// 	$json_response->fee,
-				// 	$current_time,
+				// 	'POST /disburse',
+				// 	$response,
 				// 	$current_time])) $dbh->rollback();
-				// $last_disbursement_id = $dbh->lastInsertId();
-
-				$statement = $dbh->prepare("INSERT INTO `flip_response_logs` ".
-					"(`disbursements_id`, `external_disbursement_id`, ".
-					"`request_path`, `response`, `created_at`) ".
-					"VALUES (?, ?, ?, ?, ?)");
-
-				if (!$statement->execute([
+				Model\FlipResponseLog::Log(
 					$disbursement->id,
 					$json_response->id,
 					'POST /disburse',
-					$response,
-					$current_time])) $dbh->rollback();
+					$response
+				);
 
 				$dbh->commit();
 				echo "success!\n";
