@@ -14,26 +14,18 @@
 			$payment_method	=	'FLIP';
 			$time_served		= null;
 
+			$transaction = new Model\Transaction($amount, "FLIP");
+			$transaction->create();
+
 			$data = array(
 				"bank_code"=>(string)$bank_code,
 				"account_number"=> (string)$account_number,
 				"amount"=> (int)$amount,
-				"remark"=> ""
+				"remark"=> "transaction_id_".$transaction->id
 			);
-
-			$dbh = Lib\Database::getInstance();
-			$dbh->beginTransaction();
-
-			$transaction = new Model\Transaction($data['amount'], "FLIP");
-			$transaction->create();
-
-			$data['remark'] = "transaction_id_".$transaction->id;
-			$flipAPI = new Lib\FlipAPI();
-			$response = $flipAPI->createDisbursement($data);
+	
+			$response = Lib\FlipAPI::createDisbursement($data);
 			$json_response = json_decode($response);
-			if (strtotime($json_response->time_served) > 0) {
-				$time_served = $json_response->time_served;
-			};
 
 			$disbursement = Model\FlipDisbursement::create(
 				$transaction->id,
@@ -54,15 +46,12 @@
 				$response
 			);
 
-			$dbh->commit();
 			echo "success!\n";
 			echo "info: you can check disbursement status using -> php disburse.php status ".$disbursement->id."\n";
 			break;
 		case 'status':
 			echo "check disburse status and update it to our database\n";
 			$flip_disbursements_id = (int)$argv[2];
-			$current_time = date("Y-m-d H:i:s");
-			$time_served = null;
 
 			$disbursement = Model\FlipDisbursement::findById($flip_disbursements_id);
 			if (!$disbursement) {
@@ -70,10 +59,8 @@
 				return;
 			}
 
-			$flipAPI	= new Lib\FlipAPI();
-			$response = $flipAPI->getDisbursement((int)$disbursement->external_disbursement_id);
+			$response = Lib\FlipAPI::getDisbursement((int)$disbursement->external_disbursement_id);
 			$json_response = json_decode($response);
-
 			Model\FlipResponseLog::Log(
 				$flip_disbursements_id,
 				$json_response->id,
@@ -91,7 +78,7 @@
 
 			break;
 		case 'test':
-			test_there();
+		  var_dump(Lib\FlipAPI::getDisbursement(1));
 			break;
 		default:
 			echo "unknown command!!!";
