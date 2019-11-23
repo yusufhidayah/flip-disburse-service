@@ -59,7 +59,7 @@
 
 		public function update($data){
 			if ($this->status == $data['status']){ return false; };
-
+			
 			$this->status				= $data['status'];
 			$this->receipt			= $data['receipt'];
 			$this->time_served	= $this->adjusted_time_served($data['time_served']);
@@ -154,7 +154,11 @@
 		}
 
 		private function adjusted_time_served($time_served) {
-			return (strtotime($json_response->time_served) > 0) ? $time_served : null;
+			$adjusted_time = null;
+			if (strtotime($time_served) > 0) {
+				$adjusted_time = $time_served;
+			}
+			return $adjusted_time;
 		}
 	}
 ?>

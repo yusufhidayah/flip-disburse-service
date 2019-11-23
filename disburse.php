@@ -15,7 +15,7 @@
 			$data						= prepareDisbursementData($bank_code, $account_number, $amount, "transaction_id_".$transaction->id);
 			$json_response 	= requestCreateDisburse($data);
 			$disbursement		= createDisbursement($transaction, $json_response);
-			logFlipResponse($disbursement, $json_response);
+			logFlipResponse($disbursement, $json_response, 'POST /disburse');
 
 			echo "success!\n";
 			echo "info: you can check disbursement status using -> php disburse.php status ".$disbursement->id."\n";
@@ -24,32 +24,35 @@
 			echo "check disburse status and update it to our database\n";
 			$flip_disbursements_id = (int)$argv[2];
 
-			$disbursement = Model\FlipDisbursement::findById($flip_disbursements_id);
-			if (!$disbursement) {
-				echo "record not found, please try another disbursement id\n";
-				return;
-			}
+			$disbursement = findDisbursementById($flip_disbursements_id);
+			if (!$disbursement) { echo "record not found, please try another disbursement id\n"; return; }
 
-			$response = Lib\FlipAPI::getDisbursement((int)$disbursement->external_disbursement_id);
-			$json_response = json_decode($response);
-			Model\FlipResponseLog::Log(
-				$flip_disbursements_id,
-				$json_response->id,
-				"GET /disburse/".$json_response->id,
-				$response
-			);
-				
-			$data = array(
-				"status" => $json_response->status,
-				"receipt" => $json_response->receipt,
-				"time_served" => $json_response->$time_served
-			);
+			$json_response = requestDisburseStatus((int)$disbursement->external_disbursement_id);
+			logFlipResponse($disbursement, $json_response, "GET /disburse".$json_response->id);
+			
+			$data		= prepareDisbursementUpdateData($json_response);
 			$result = $disbursement->update($data);
 			if ($result) echo "successfully updated!\n"; else echo "update failed!\n";
-
 			break;
 		default:
 			echo "unknown command!!!";
+	}
+
+	function prepareDisbursementUpdateData($json_response) {
+		return array(
+			"status" => $json_response->status,
+			"receipt" => $json_response->receipt,
+			"time_served" => $json_response->time_served
+		);
+	}
+
+	function requestDisburseStatus($external_disbursement_id) {
+		$response = Lib\FlipAPI::getDisbursement($external_disbursement_id);
+		return json_decode($response);
+	}
+
+	function findDisbursementById($id) {
+		return Model\FlipDisbursement::findById($id);
 	}
 
 	function createTransaction($amount) {
@@ -90,11 +93,11 @@
 		return $disbursement;
 	}
 
-	function logFlipResponse($disbursement, $json_response) {
+	function logFlipResponse($disbursement, $json_response, $path) {
 		Model\FlipResponseLog::Log(
 			$disbursement->id,
 			$json_response->id,
-			'POST /disburse',
+			$path,
 			json_encode($json_response)
 		);
 	}
