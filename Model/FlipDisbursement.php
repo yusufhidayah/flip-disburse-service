@@ -57,6 +57,25 @@
 			return $instance;
 		}
 
+		public function update($data){
+			$this->status				= $data['status'];
+			$this->receipt			= $data['receipt'];
+			$this->time_served	= $data['time_served'];
+			$this->updated_at		=	date("Y-m-d H:i:s");
+
+			$statement = $this->db_connection->prepare("UPDATE `flip_disbursements` ".
+				"SET `status`=?, `receipt`=?, `time_served`=?, `updated_at`=? WHERE `id`=?");
+			$result = $statement->execute([
+				$this->status,
+				$this->receipt,
+				$this->time_served,
+				$this->updated_at,
+				$this->id
+			]);
+
+			return $result;
+		}
+
 		protected function selectFromDatabaseById($id) {
 			$stmt = $this->db_connection->prepare("SELECT * FROM `flip_disbursements` WHERE id=?");
 			$stmt->execute([$id]);

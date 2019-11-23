@@ -90,20 +90,14 @@
 
 				if ($status_changed) {
 					echo "status changed, save it to database... ";
-
-					$dbh->beginTransaction();
-
-					$statement = $dbh->prepare("UPDATE `flip_disbursements` ".
-						"SET `status`=?, `receipt`=?, `time_served`=?, `updated_at`=? WHERE `id`=?");
-					if (!$statement->execute([
-						$json_response->status,
-						$json_response->receipt,
-						$time_served,
-						$current_time,
-						$flip_disbursements_id])) $dbh->rollback();
-
-						$dbh->commit();
-						echo "successfully updated!\n";
+					
+					$data = array(
+						"status" => $json_response->status,
+						"receipt" => $json_response->receipt,
+						"time_served" => $time_served
+					);
+					$result = $disbursement->update($data);
+					if ($result) echo "successfully updated!\n"; else echo "update failed!\n";
 				}
 				break;
 			case 'test':
